@@ -1,0 +1,81 @@
+version: "3"
+
+services:
+    laravel-web:
+        container_name: laravel-web
+        image: nginx
+        volumes:
+            - ./docker/nginx/conf.d:/etc/nginx/conf.d
+            - ./laravel:/var/www
+        ports:
+            - "9080:80"
+        depends_on:
+            - laravel-app
+
+    laravel-app:
+        container_name: laravel-app
+        build: ./docker/app/
+        environment:
+            - APP_ENV=docker
+        volumes:
+            - ./laravel:/var/www
+
+    laravel-echo-server:
+        container_name: laravel-echo-server
+        image: broadcast-echo-server
+        build: ./docker/echoserver
+        ports:
+            - "6001:6001"
+        command: laravel-echo-server start
+        volumes:
+            - ./laravel-echo-server:/work
+        working_dir: /work
+
+    # tsudoyell-ws:
+    #     container_name: tsudoyell-ws
+    #     build: ./docker/node/
+    #     environment:
+    #         - NODE_ENV=development
+    #         - PORT=3000
+    #     working_dir: /home/node/app
+    #     command: npm run start
+    #     volumes:
+    #         - ./tsudoyell-node:/home/node/app
+
+    laravel-mysql:
+        container_name: laravel-mysql
+        image: mysql:5.7
+        environment:
+            MYSQL_DATABASE: 'app'
+            MYSQL_ROOT_PASSWORD: 'root'
+            TZ: 'Asia/Tokyo'
+        command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+        volumes:
+            - ./docker/mysql/conf.d:/etc/mysql/conf.d
+            - ./docker/mysql/sqls:/docker-entrypoint-initdb.d
+        ports:
+            - "11306:3306"
+
+    laravel-redis:
+        container_name: laravel-redis
+        image: redis:latest
+        ports:
+            - "6379:6379"
+        volumes:
+            - "./docker/redis/data:/data"
+
+    laravel-pmyadmin:
+        container_name: laravel-phpMyAdmin
+        image: phpmyadmin/phpmyadmin
+        environment:
+            - PMA_ARBITRARY=1
+            - PMA_HOST=laravel-mysql
+            - PMA_USER=root
+            - PMA_PASSWORD=root
+        links:
+            - laravel-mysql
+        ports:
+            - "9081:80"
+        volumes:
+            - ./docker/phpmyadmin/sessions:/sessions
+            - ./docker/phpmyadmin/conf.d:/usr/local/etc/php/conf.d
