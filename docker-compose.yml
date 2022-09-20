@@ -31,8 +31,8 @@ services:
             - ./laravel-echo-server:/work
         working_dir: /work
 
-    # tsudoyell-ws:
-    #     container_name: tsudoyell-ws
+    # laravel-ws:
+    #     container_name: laravel-ws
     #     build: ./docker/node/
     #     environment:
     #         - NODE_ENV=development
@@ -40,7 +40,7 @@ services:
     #     working_dir: /home/node/app
     #     command: npm run start
     #     volumes:
-    #         - ./tsudoyell-node:/home/node/app
+    #         - ./laravel-node:/home/node/app
 
     laravel-mysql:
         container_name: laravel-mysql
